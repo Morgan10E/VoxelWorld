@@ -35,7 +35,7 @@ void mouse_callback(GLFWwindow* window, double xpos, double ypos);
 void scroll_callback(GLFWwindow* window, double xoffset, double yoffset);
 void do_movement();
 
-std::vector<std::vector<float> > perlinField(int width, int length, float heightMultiplier);
+std::vector<std::vector<float> > perlinField(int width, int length, float heightMultiplier, float variability);
 void printGrid(std::vector<std::vector<float> >& grid);
 
 // Window dimensions
@@ -59,8 +59,9 @@ int main()
 {
     int width = 100;
     int length = 100;
-    
-    std::vector<std::vector<float> > grid = perlinField(width, length, 4.0);
+    float heightMultiplier = 10.0;
+    float variability = 2.0f;
+    std::vector<std::vector<float> > grid = perlinField(width, length, heightMultiplier, variability);
     printGrid(grid);
     // Init GLFW
     glfwInit();
@@ -290,12 +291,12 @@ void scroll_callback(GLFWwindow* window, double xoffset, double yoffset)
     camera.ProcessMouseScroll(yoffset);
 }
 
-std::vector<std::vector<float> > perlinField(int width, int length, float heightMultiplier) {
+std::vector<std::vector<float> > perlinField(int width, int length, float heightMultiplier, float variability) {
   std::vector<std::vector<float> > grid (width);
   for (int r = 0; r < width; r++) {
     grid[r] = std::vector<float> (length);
     for (int c = 0; c < length; c++) {
-      grid[r][c] = stb_perlin_noise3((float)r/width, (float)c/length, 0) * heightMultiplier;
+      grid[r][c] = stb_perlin_noise3((float)r/width * variability, (float)c/length * variability, 0) * heightMultiplier;
     }
   }
 
