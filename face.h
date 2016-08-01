@@ -74,9 +74,9 @@ std::vector<std::vector<Voxel> > Face::perlinFieldY(float x, float y, float z, i
     std::vector<Voxel> row;
     grid.push_back(row);
     for (int c = 0; c < this->width; c++) {
-      float height = stb_perlin_noise3((float)(x+r)/this->width * this->variability, y/this->width * this->variability, (float)(z+c)/this->width * this->variability) * this->heightMultiplier;
+      float height = stb_perlin_noise3((float)(x+r)/this->width * this->variability, y/this->width * this->variability, (float)(z+c)/this->width * this->variability) * this->heightMultiplier * (this->width/2 - abs(this->width/2 - c)) / (this->width/2) * (this->width/2 - abs(this->width/2 - r)) / (this->width/2);
       glm::vec3 color(1.0f, 0.3f, 0.3f);
-      if (height < 0) {
+      if (floorf(height) < -1) {
         color = glm::vec3(0.3f, 0.3f, 1.0f);
       }
       Voxel newVoxel(shader, color);
@@ -95,9 +95,9 @@ std::vector<std::vector<Voxel> > Face::perlinFieldX(float x, float y, float z, i
     std::vector<Voxel> row;
     grid.push_back(row);
     for (int c = 0; c < this->width; c++) {
-      float height = stb_perlin_noise3(x/this->width * this->variability, (float)(y+r)/this->width * this->variability, (float)(z+c)/this->width * this->variability) * this->heightMultiplier;
+      float height = stb_perlin_noise3(x/this->width * this->variability, (float)(y+r)/this->width * this->variability, (float)(z+c)/this->width * this->variability) * this->heightMultiplier * (this->width/2 - abs(this->width/2 - c)) / (this->width/2) * (this->width/2 - abs(this->width/2 - r)) / (this->width/2);
       glm::vec3 color(1.0f, 0.3f, 0.3f);
-      if (height < 0) {
+      if (floorf(height) < -1) {
         color = glm::vec3(0.3f, 0.3f, 1.0f);
       }
       Voxel newVoxel(shader, color);
@@ -116,17 +116,28 @@ std::vector<std::vector<Voxel> > Face::perlinFieldZ(float x, float y, float z, i
     std::vector<Voxel> row;
     grid.push_back(row);
     for (int c = 0; c < this->width; c++) {
-      float height = stb_perlin_noise3((float)(x+r)/this->width * this->variability, (float)(z+c)/this->width * this->variability, z/this->width * this->variability) * this->heightMultiplier;
+      float height = stb_perlin_noise3((float)(x+r)/this->width * this->variability, (float)(z+c)/this->width * this->variability, z/this->width * this->variability) * this->heightMultiplier * (this->width/2 - abs(this->width/2 - c)) / (this->width/2) * (this->width/2 - abs(this->width/2 - r)) / (this->width/2);
       glm::vec3 color(1.0f, 0.3f, 0.3f);
-      if (height < 0) {
+      if (floorf(height) < -1) {
         color = glm::vec3(0.3f, 0.3f, 1.0f);
       }
       Voxel newVoxel(shader, color);
       newVoxel.translate(x+r, y+c, floorf(z+direction*height));
       // std::cout << x+r << ", " << floorf(y+height) << ", " << z+c << std::endl;
       grid[r].push_back(newVoxel);
+      // if ((c == 0 || c == this->width - 1) && floorf(height) > 1) {
+      //
+      // }
     }
   }
+
+  // void fillBackZ(float x, float y, float z, int nSteps, int direction, std::vector<Voxel>& row) {
+  //   for (int i = 1; i < nSteps; i++) {
+  //     Voxel newVoxel(shader);
+  //     newVoxel.translate(x, y, floorf(z+direction*i));
+  //     row.push_back(newVoxel);
+  //   }
+  // }
 
   return grid;
 }

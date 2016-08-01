@@ -60,8 +60,8 @@ GLfloat lastFrame = 0.0f;  	// Time of last frame
 int main()
 {
     int width = 40;
-    float heightMultiplier = 5.0;
-    float variability = 2.0f;
+    float heightMultiplier = 10.0;
+    float variability = 3.0f;
     float floorFactor = 1.0f;
     // std::vector<std::vector<float> > grid = perlinField(width, length, heightMultiplier, variability);
     // printGrid(grid);
