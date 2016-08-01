@@ -24,7 +24,8 @@
 #include "Camera.h"
 
 // #include "voxel.h"
-#include "face.h"
+// #include "face.h"
+#include "world.h"
 
 // #include "stb_perlin.h"
 #include <vector>
@@ -180,12 +181,14 @@ int main()
     //   }
     // }
 
-    Face face1(&lightingShader, 0,0,0, width, "NZ", heightMultiplier, variability);
-    Face face2(&lightingShader, 0,0,0, width, "NY", heightMultiplier, variability);
-    Face face3(&lightingShader, 0,0,width, width, "PZ", heightMultiplier, variability);
-    Face face4(&lightingShader, 0,width,0, width, "PY", heightMultiplier, variability);
-    Face face5(&lightingShader, 0,0,0, width, "NX", heightMultiplier, variability);
-    Face face6(&lightingShader, width,0,0, width, "PX", heightMultiplier, variability);
+    // Face face1(&lightingShader, 0,0,0, width, "NZ", heightMultiplier, variability);
+    // Face face2(&lightingShader, 0,0,0, width, "NY", heightMultiplier, variability);
+    // Face face3(&lightingShader, 0,0,width, width, "PZ", heightMultiplier, variability);
+    // Face face4(&lightingShader, 0,width,0, width, "PY", heightMultiplier, variability);
+    // Face face5(&lightingShader, 0,0,0, width, "NX", heightMultiplier, variability);
+    // Face face6(&lightingShader, width,0,0, width, "PX", heightMultiplier, variability);
+
+    World world(&lightingShader, 0,0,0, width, heightMultiplier, variability);
 
     // Game loop
     while (!glfwWindowShouldClose(window))
@@ -238,12 +241,14 @@ int main()
         // for (std::vector<Voxel>::iterator voxel = voxels.begin(); voxel != voxels.end(); ++voxel) {
         //   (*voxel).render();
         // }
-        face1.render();
-        face2.render();
-        face3.render();
-        face4.render();
-        face5.render();
-        face6.render();
+        // face1.render();
+        // face2.render();
+        // face3.render();
+        // face4.render();
+        // face5.render();
+        // face6.render();
+
+        world.render();
 
         // Swap the screen buffers
         glfwSwapBuffers(window);
