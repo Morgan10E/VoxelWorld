@@ -23,9 +23,10 @@
 #include "Shader.h"
 #include "Camera.h"
 
-#include "voxel.h"
+// #include "voxel.h"
+#include "face.h"
 
-#include "stb_perlin.h"
+// #include "stb_perlin.h"
 #include <vector>
 
 
@@ -42,7 +43,7 @@ void printGrid(std::vector<std::vector<float> >& grid);
 const GLuint WIDTH = 800, HEIGHT = 600;
 
 // Camera
-Camera  camera(glm::vec3(0.0f, 0.0f, 3.0f));
+Camera  camera(glm::vec3(10.0f, 10.0f, 10.0f));
 GLfloat lastX  =  WIDTH  / 2.0;
 GLfloat lastY  =  HEIGHT / 2.0;
 bool    keys[1024];
@@ -61,8 +62,9 @@ int main()
     int length = 100;
     float heightMultiplier = 10.0;
     float variability = 2.0f;
+    float floorFactor = 1.0f;
     std::vector<std::vector<float> > grid = perlinField(width, length, heightMultiplier, variability);
-    printGrid(grid);
+    // printGrid(grid);
     // Init GLFW
     glfwInit();
     // Set all the required options for GLFW
@@ -73,7 +75,7 @@ int main()
     glfwWindowHint(GLFW_RESIZABLE, GL_FALSE);
 
     // Create a GLFWwindow object that we can use for GLFW's functions
-    GLFWwindow* window = glfwCreateWindow(WIDTH, HEIGHT, "HW3", nullptr, nullptr);
+    GLFWwindow* window = glfwCreateWindow(WIDTH, HEIGHT, "Final Project", nullptr, nullptr);
     glfwMakeContextCurrent(window);
 
     // Set the required callback functions
@@ -102,7 +104,8 @@ int main()
     Shader lightingShader("phong.vs", "phong.frag");
 
     // Set up vertex data (and buffer(s)) and attribute pointers
-    GLfloat vertices[] = {
+    // First, set the container's VAO (and VBO)
+    float vertices[] = {
         -0.5f, -0.5f, -0.5f,  0.0f,  0.0f, -1.0f,
          0.5f, -0.5f, -0.5f,  0.0f,  0.0f, -1.0f,
          0.5f,  0.5f, -0.5f,  0.0f,  0.0f, -1.0f,
@@ -145,7 +148,7 @@ int main()
         -0.5f,  0.5f,  0.5f,  0.0f,  1.0f,  0.0f,
         -0.5f,  0.5f, -0.5f,  0.0f,  1.0f,  0.0f
     };
-    // First, set the container's VAO (and VBO)
+
     GLuint VBO, containerVAO;
     glGenVertexArrays(1, &containerVAO);
     glGenBuffers(1, &VBO);
@@ -169,14 +172,16 @@ int main()
     // We only need to bind to the VBO (to link it with glVertexAttribPointer), no need to fill it; the VBO's data already contains all we need.
     glBindBuffer(GL_ARRAY_BUFFER, VBO);
 
-    std::vector<Voxel> voxels;
-    for (int r = 0; r < width; r++) {
-      for (int c = 0; c < length; c++) {
-        Voxel voxel(&lightingShader);
-        voxel.translate(1.0f * r, 1.0f * c, grid[r][c]);
-        voxels.push_back(voxel);
-      }
-    }
+    // std::vector<Voxel> voxels;
+    // for (int r = 0; r > -width; r--) {
+    //   for (int c = 0; c > -length; c--) {
+    //     Voxel voxel(&lightingShader);
+    //     voxel.translate(1.0f * r, floorf(grid[-r][-c] / floorFactor) * floorFactor, 1.0f * c);
+    //     voxels.push_back(voxel);
+    //   }
+    // }
+
+    Face face(&lightingShader, 0,0,0, 100, "doesnt matter yet", heightMultiplier, variability);
 
     // Game loop
     while (!glfwWindowShouldClose(window))
@@ -226,9 +231,10 @@ int main()
         // glDrawArrays(GL_TRIANGLES, 0, 36);
         // glBindVertexArray(0);
 
-        for (std::vector<Voxel>::iterator voxel = voxels.begin(); voxel != voxels.end(); ++voxel) {
-          (*voxel).render();
-        }
+        // for (std::vector<Voxel>::iterator voxel = voxels.begin(); voxel != voxels.end(); ++voxel) {
+        //   (*voxel).render();
+        // }
+        face.render();
 
         // Swap the screen buffers
         glfwSwapBuffers(window);

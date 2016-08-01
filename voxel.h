@@ -24,7 +24,7 @@ class Voxel {
     void init(Shader* shader, glm::vec3 color);
     // ~Voxel();
 
-    void render(/*glm::mat4 &view, glm::mat4 &projection*/);
+    void render();
 
     void translate(float x, float y, float z);
 
@@ -41,18 +41,12 @@ class Voxel {
 };
 
 Voxel::Voxel(Shader* shader, glm::vec3 color) {
-  // std::cout << "Voxel being constructed with color " << glm::to_string(color) << std::endl;
   this->init(shader, color);
 }
 
 Voxel::Voxel(Shader* shader) {
-  // std::cout << "Voxel being constructed" << std::endl;
   this->init(shader, glm::vec3(1.0f, 0.2f, 0.2f));
 }
-
-// Voxel::~Voxel() {
-//   //deconstructor
-// }
 
 void Voxel::init(Shader* shader, glm::vec3 color) {
   float vertices[] = {
@@ -123,20 +117,15 @@ void Voxel::init(Shader* shader, glm::vec3 color) {
   glEnableVertexAttribArray(1);
 
   glBindVertexArray(0);
-
-  // std::cout << "Voxel initialization completed" << std::endl;
 }
 
-void Voxel::render(/*glm::mat4 &view, glm::mat4 &projection*/) {
+void Voxel::render() {
   shader->Use();
 
   glBindVertexArray(voxelCornersAO);
 
   glUniform3f(voxelColorLoc, this->color[0], this->color[1], this->color[2]);
   glUniformMatrix4fv(modelLoc, 1, GL_FALSE, glm::value_ptr(model));
-
-  // glUniformMatrix4fv(projectionLoc, 1, GL_FALSE, glm::value_ptr(projection));
-  // glUniformMatrix4fv(modelLoc, 1, GL_FALSE, glm::value_ptr(model));
   glDrawArrays(GL_TRIANGLES, 0, 36);
   glBindVertexArray(0);
 }

@@ -2,7 +2,7 @@ CPP = g++
 LD = g++
 CPPFLAGS = -O3 -std=c++11
 LDFLAGS =
-TARGET = hw3
+TARGET = run_project
 OBJS = main.o
 OS = $(shell uname)
 
