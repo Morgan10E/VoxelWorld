@@ -74,7 +74,7 @@ std::vector<std::vector<Voxel> > Face::perlinFieldY(float x, float y, float z, i
     std::vector<Voxel> row;
     grid.push_back(row);
     for (int c = 0; c < this->width; c++) {
-      float height = stb_perlin_noise3((float)(x+r)/this->width * this->variability, y, (float)(z+c)/this->width * this->variability) * this->heightMultiplier;
+      float height = stb_perlin_noise3((float)(x+r)/this->width * this->variability, y/this->width * this->variability, (float)(z+c)/this->width * this->variability) * this->heightMultiplier;
       glm::vec3 color(1.0f, 0.3f, 0.3f);
       if (height < 0) {
         color = glm::vec3(0.3f, 0.3f, 1.0f);
@@ -95,7 +95,7 @@ std::vector<std::vector<Voxel> > Face::perlinFieldX(float x, float y, float z, i
     std::vector<Voxel> row;
     grid.push_back(row);
     for (int c = 0; c < this->width; c++) {
-      float height = stb_perlin_noise3(x, (float)(y+r)/this->width * this->variability, (float)(z+c)/this->width * this->variability) * this->heightMultiplier;
+      float height = stb_perlin_noise3(x/this->width * this->variability, (float)(y+r)/this->width * this->variability, (float)(z+c)/this->width * this->variability) * this->heightMultiplier;
       glm::vec3 color(1.0f, 0.3f, 0.3f);
       if (height < 0) {
         color = glm::vec3(0.3f, 0.3f, 1.0f);
@@ -116,7 +116,7 @@ std::vector<std::vector<Voxel> > Face::perlinFieldZ(float x, float y, float z, i
     std::vector<Voxel> row;
     grid.push_back(row);
     for (int c = 0; c < this->width; c++) {
-      float height = stb_perlin_noise3((float)(x+r)/this->width * this->variability, (float)(z+c)/this->width * this->variability, z) * this->heightMultiplier;
+      float height = stb_perlin_noise3((float)(x+r)/this->width * this->variability, (float)(z+c)/this->width * this->variability, z/this->width * this->variability) * this->heightMultiplier;
       glm::vec3 color(1.0f, 0.3f, 0.3f);
       if (height < 0) {
         color = glm::vec3(0.3f, 0.3f, 1.0f);
