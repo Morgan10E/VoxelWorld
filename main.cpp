@@ -184,6 +184,8 @@ int main()
     Face face2(&lightingShader, 0,0,0, width, "NY", heightMultiplier, variability);
     Face face3(&lightingShader, 0,0,width, width, "PZ", heightMultiplier, variability);
     Face face4(&lightingShader, 0,width,0, width, "PY", heightMultiplier, variability);
+    Face face5(&lightingShader, 0,0,0, width, "NX", heightMultiplier, variability);
+    Face face6(&lightingShader, width,0,0, width, "PX", heightMultiplier, variability);
 
     // Game loop
     while (!glfwWindowShouldClose(window))
@@ -240,6 +242,8 @@ int main()
         face2.render();
         face3.render();
         face4.render();
+        face5.render();
+        face6.render();
 
         // Swap the screen buffers
         glfwSwapBuffers(window);
