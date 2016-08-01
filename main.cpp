@@ -188,7 +188,7 @@ int main()
     // Face face5(&lightingShader, 0,0,0, width, "NX", heightMultiplier, variability);
     // Face face6(&lightingShader, width,0,0, width, "PX", heightMultiplier, variability);
 
-    World world(&lightingShader, 0,0,0, width, heightMultiplier, variability);
+    World world(&lightingShader, 0,-20,-50, width, heightMultiplier, variability);
 
     // Game loop
     while (!glfwWindowShouldClose(window))

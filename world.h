@@ -53,7 +53,7 @@ World::World(Shader* shader, float x, float y, float z, int width, float heightM
   this->faces.push_back(face1);
   Face face2(shader, x,y,z, width, "NY", heightMultiplier, variability);
   this->faces.push_back(face2);
-  Face face3(shader, y,y,z+width, width, "PZ", heightMultiplier, variability);
+  Face face3(shader, x,y,z+width, width, "PZ", heightMultiplier, variability);
   this->faces.push_back(face3);
   Face face4(shader, x,y+width,z, width, "PY", heightMultiplier, variability);
   this->faces.push_back(face4);
