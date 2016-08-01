@@ -24,7 +24,8 @@ class Face {
   public:
     Face(Shader* shader, float x, float y, float z, int width, std::string direction, float heightMultiplier, float variability);
     void init(Shader* shader, glm::vec3 color);
-    std::vector<std::vector<Voxel> > perlinFieldY(float x, float y, float z);
+    std::vector<std::vector<Voxel> > perlinFieldY(float x, float y, float z, int direction);
+    std::vector<std::vector<Voxel> > perlinFieldZ(float x, float y, float z, int direction);
     // ~Face();
 
     void render();
@@ -51,10 +52,18 @@ Face::Face(Shader* shader, float x, float y, float z, int width, std::string dir
   this->heightMultiplier = heightMultiplier;
   this->variability = variability;
 
-  this->voxels = perlinFieldY(x, y, z);
+  if (direction == "NY") {
+    this->voxels = perlinFieldY(x, y, z, -1);
+  } else if (direction == "NZ") {
+    this->voxels = perlinFieldZ(x, y, z, -1);
+  } else if (direction == "PZ") {
+    this->voxels = perlinFieldZ(x, y, z, 1);
+  } else if (direction == "PY") {
+    this->voxels = perlinFieldY(x, y, z, 1);
+  }
 }
 
-std::vector<std::vector<Voxel> > Face::perlinFieldY(float x, float y, float z) {
+std::vector<std::vector<Voxel> > Face::perlinFieldY(float x, float y, float z, int direction) {
   std::vector<std::vector<Voxel> > grid;
   for (int r = 0; r < this->width; r++) {
     std::vector<Voxel> row;
@@ -62,7 +71,41 @@ std::vector<std::vector<Voxel> > Face::perlinFieldY(float x, float y, float z) {
     for (int c = 0; c < this->width; c++) {
       float height = stb_perlin_noise3((float)(x+r)/this->width * this->variability, y, (float)(z+c)/this->width * this->variability) * this->heightMultiplier;
       Voxel newVoxel(shader);
-      newVoxel.translate(x+r, floorf(y+height), z+c);
+      newVoxel.translate(x+r, floorf(y+direction*height), z+c);
+      // std::cout << x+r << ", " << floorf(y+height) << ", " << z+c << std::endl;
+      grid[r].push_back(newVoxel);
+    }
+  }
+
+  return grid;
+}
+
+// std::vector<std::vector<Voxel> > Face::perlinFieldX(float x, float y, float z, int direction) {
+//   std::vector<std::vector<Voxel> > grid;
+//   for (int r = 0; r < this->width; r++) {
+//     std::vector<Voxel> row;
+//     grid.push_back(row);
+//     for (int c = 0; c < this->width; c++) {
+//       float height = stb_perlin_noise3((float)(x+r)/this->width * this->variability, y, (float)(z+c)/this->width * this->variability) * this->heightMultiplier;
+//       Voxel newVoxel(shader);
+//       newVoxel.translate(x+r, floorf(y+direction*height), z+c);
+//       // std::cout << x+r << ", " << floorf(y+height) << ", " << z+c << std::endl;
+//       grid[r].push_back(newVoxel);
+//     }
+//   }
+//
+//   return grid;
+// }
+
+std::vector<std::vector<Voxel> > Face::perlinFieldZ(float x, float y, float z, int direction) {
+  std::vector<std::vector<Voxel> > grid;
+  for (int r = 0; r < this->width; r++) {
+    std::vector<Voxel> row;
+    grid.push_back(row);
+    for (int c = 0; c < this->width; c++) {
+      float height = stb_perlin_noise3((float)(x+r)/this->width * this->variability, (float)(z+c)/this->width * this->variability, z) * this->heightMultiplier;
+      Voxel newVoxel(shader);
+      newVoxel.translate(x+r, y+c, floorf(z+direction*height));
       // std::cout << x+r << ", " << floorf(y+height) << ", " << z+c << std::endl;
       grid[r].push_back(newVoxel);
     }

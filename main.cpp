@@ -43,7 +43,7 @@ void printGrid(std::vector<std::vector<float> >& grid);
 const GLuint WIDTH = 800, HEIGHT = 600;
 
 // Camera
-Camera  camera(glm::vec3(10.0f, 10.0f, 10.0f));
+Camera  camera(glm::vec3(10.0f, 10.0f, 50.0f));
 GLfloat lastX  =  WIDTH  / 2.0;
 GLfloat lastY  =  HEIGHT / 2.0;
 bool    keys[1024];
@@ -58,12 +58,11 @@ GLfloat lastFrame = 0.0f;  	// Time of last frame
 // The MAIN function, from here we start the application and run the game loop
 int main()
 {
-    int width = 100;
-    int length = 100;
+    int width = 40;
     float heightMultiplier = 10.0;
     float variability = 2.0f;
     float floorFactor = 1.0f;
-    std::vector<std::vector<float> > grid = perlinField(width, length, heightMultiplier, variability);
+    // std::vector<std::vector<float> > grid = perlinField(width, length, heightMultiplier, variability);
     // printGrid(grid);
     // Init GLFW
     glfwInit();
@@ -181,7 +180,10 @@ int main()
     //   }
     // }
 
-    Face face(&lightingShader, 0,0,0, 100, "doesnt matter yet", heightMultiplier, variability);
+    Face face1(&lightingShader, 0,0,0, width, "NZ", heightMultiplier, variability);
+    Face face2(&lightingShader, 0,0,0, width, "NY", heightMultiplier, variability);
+    Face face3(&lightingShader, 0,0,width, width, "PZ", heightMultiplier, variability);
+    Face face4(&lightingShader, 0,width,0, width, "PY", heightMultiplier, variability);
 
     // Game loop
     while (!glfwWindowShouldClose(window))
@@ -234,7 +236,10 @@ int main()
         // for (std::vector<Voxel>::iterator voxel = voxels.begin(); voxel != voxels.end(); ++voxel) {
         //   (*voxel).render();
         // }
-        face.render();
+        face1.render();
+        face2.render();
+        face3.render();
+        face4.render();
 
         // Swap the screen buffers
         glfwSwapBuffers(window);
