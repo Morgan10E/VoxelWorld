@@ -32,6 +32,7 @@ class Face {
     void render();
 
     void translate(float x, float y, float z);
+    void rotate(glm::vec3 axis, float theta);
 
     Shader* shader;
 
@@ -147,6 +148,14 @@ void Face::translate(float x, float y, float z) {
   for (std::vector<std::vector<Voxel> >::iterator rit = voxels.begin(); rit != voxels.end(); ++rit) {
     for (std::vector<Voxel>::iterator cit = (*rit).begin(); cit != (*rit).end(); ++cit) {
       cit->translate(x, y, z);
+    }
+  }
+}
+
+void Face::rotate(glm::vec3 axis, float theta) {
+  for (std::vector<std::vector<Voxel> >::iterator rit = voxels.begin(); rit != voxels.end(); ++rit) {
+    for (std::vector<Voxel>::iterator cit = (*rit).begin(); cit != (*rit).end(); ++cit) {
+      cit->rotate(axis, theta);
     }
   }
 }

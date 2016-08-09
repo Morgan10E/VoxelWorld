@@ -27,17 +27,20 @@ class Voxel {
     void render();
 
     void translate(float x, float y, float z);
+    void rotate(glm::vec3 axis, float theta);
 
     glm::vec3 color;
 
     Shader* shader;
 
-    glm::mat4 model;
+    glm::mat4 model, rotation, translation;
+
+    // strint type
 
   private:
     GLuint voxelCornersAO;
 
-    GLint modelLoc, viewLoc, projectionLoc, voxelColorLoc;
+    GLint modelLoc, transLoc, rotLoc, viewLoc, projectionLoc, voxelColorLoc;
 };
 
 Voxel::Voxel(Shader* shader, glm::vec3 color) {
@@ -94,10 +97,15 @@ void Voxel::init(Shader* shader, glm::vec3 color) {
   };
 
   this->model = glm::mat4(1.0f);
+  this->rotation = glm::mat4(1.0f);
+  this->translation = glm::mat4(1.0f);
   this->color = color;
   this->shader = shader;
+  // this->type = "NONE";
 
   modelLoc = glGetUniformLocation(shader->Program, "model");
+  rotLoc = glGetUniformLocation(shader->Program, "rotation");
+  transLoc = glGetUniformLocation(shader->Program, "translation");
 	projectionLoc = glGetUniformLocation(shader->Program, "projection");
   voxelColorLoc = glGetUniformLocation(shader->Program, "voxelColor");
 
@@ -126,11 +134,17 @@ void Voxel::render() {
 
   glUniform3f(voxelColorLoc, this->color[0], this->color[1], this->color[2]);
   glUniformMatrix4fv(modelLoc, 1, GL_FALSE, glm::value_ptr(model));
+  glUniformMatrix4fv(rotLoc, 1, GL_FALSE, glm::value_ptr(rotation));
+  glUniformMatrix4fv(transLoc, 1, GL_FALSE, glm::value_ptr(translation));
   glDrawArrays(GL_TRIANGLES, 0, 36);
   glBindVertexArray(0);
 }
 
 void Voxel::translate(float x, float y, float z) {
   glm::vec3 translation = glm::vec3(x, y, z);
-  this->model = glm::translate(this->model, translation);
+  this->translation = glm::translate(this->translation, translation);
+}
+
+void Voxel::rotate(glm::vec3 axis, float theta) {
+  this->rotation = glm::rotate(this->rotation, theta, axis);
 }

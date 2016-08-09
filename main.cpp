@@ -60,8 +60,8 @@ GLfloat lastFrame = 0.0f;  	// Time of last frame
 int main()
 {
     int width = 40;
-    float heightMultiplier = 10.0;
-    float variability = 3.0f;
+    float heightMultiplier = 15.0;
+    float variability = 4.0f;
     float floorFactor = 1.0f;
     // std::vector<std::vector<float> > grid = perlinField(width, length, heightMultiplier, variability);
     // printGrid(grid);
@@ -188,7 +188,8 @@ int main()
     // Face face5(&lightingShader, 0,0,0, width, "NX", heightMultiplier, variability);
     // Face face6(&lightingShader, width,0,0, width, "PX", heightMultiplier, variability);
 
-    World world(&lightingShader, 0,-20,-50, width, heightMultiplier, variability);
+    World world(&lightingShader, 0,0,0, width, heightMultiplier, variability);
+    // world.rotate(glm::vec3(0,1,0), 180);
 
     // Game loop
     while (!glfwWindowShouldClose(window))
@@ -247,7 +248,7 @@ int main()
         // face4.render();
         // face5.render();
         // face6.render();
-
+        world.rotate(glm::vec3(0,1,0), currentFrame/10000);
         world.render();
 
         // Swap the screen buffers
