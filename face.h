@@ -111,7 +111,7 @@ std::vector<std::vector<Voxel> > Face::perlinFieldY(float x, float y, float z, i
       Voxel newVoxel(shader, shadowShader, depthMap, depthMapFBO, lightSpaceMatrix, color);
 
       if (floorf(height) > 0) {
-        newVoxel.translate(x+r, floorf(y+direction*height/2), z+c);
+        newVoxel.translate(x+r, floorf(y+direction*(height-1)/2), z+c);
         newVoxel.scale(1, floorf(height), 1);
       } else {
         newVoxel.translate(x+r, floorf(y+direction*height), z+c);
@@ -148,7 +148,7 @@ std::vector<std::vector<Voxel> > Face::perlinFieldX(float x, float y, float z, i
       Voxel newVoxel(shader, shadowShader, depthMap, depthMapFBO, lightSpaceMatrix, color);
 
       if (floorf(height) > 0) {
-        newVoxel.translate(floorf(x+direction*height/2), y+r, z+c);
+        newVoxel.translate(floorf(x+direction*(height-1)/2), y+r, z+c);
         newVoxel.scale(floorf(height), 1, 1);
       } else {
         newVoxel.translate(floorf(x+direction*height), y+r, z+c);
@@ -185,7 +185,7 @@ std::vector<std::vector<Voxel> > Face::perlinFieldZ(float x, float y, float z, i
       Voxel newVoxel(shader, shadowShader, depthMap, depthMapFBO, lightSpaceMatrix, color);
 
       if (floorf(height) > 0) {
-        newVoxel.translate(x+r, y+c, floorf(z+direction*height/2));
+        newVoxel.translate(x+r, y+c, floorf(z+direction*(height-1)/2));
         newVoxel.scale(1, 1, floorf(height));
       } else {
         newVoxel.translate(x+r, y+c, floorf(z+direction*height));

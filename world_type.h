@@ -43,6 +43,10 @@ class WorldType {
     glm::vec3 treeColorR();
     glm::vec3 landColorR();
 
+    glm::vec3 startWaterColor();
+    glm::vec3 startTreeColor();
+    glm::vec3 startLandColor();
+
     float random();
 };
 
@@ -53,13 +57,14 @@ WorldType::WorldType() {
 WorldType::WorldType(float maxHeight) {
   waterHeight = random() * maxHeight/2 - maxHeight/4;
   std::cout << "Water Height: " << waterHeight << std::endl;
-  waterColor = glm::vec3(0.3f, 0.3f, 1.0f);
+  waterColor = startWaterColor();
 
   float remaining = maxHeight - waterHeight;
-  treeLine = random() * remaining + waterHeight;
+  treeLine = random() * remaining * 3 / 4 + waterHeight;
 
-  treeColor = glm::vec3(0.3f, 1.0f, 0.3f);
-  landColor = glm::vec3(0.4f, 0.4f, 0.4f);
+  treeColor = startTreeColor();
+
+  landColor = startLandColor();
 
   remaining = maxHeight - treeLine;
   snowLine = random() * remaining + treeLine;
@@ -86,6 +91,21 @@ glm::vec3 WorldType::landColorR() {
 
 glm::vec3 WorldType::treeColorR() {
   return glm::vec3(treeColor.r + random() * 0.1f - 0.05f,  treeColor.g + random() * 0.1f - 0.05f, treeColor.b + random() * 0.1f - 0.05f);
+}
+
+glm::vec3 WorldType::startWaterColor() {
+  std::vector<glm::vec3> colors = {glm::vec3(0.3f, 0.8f, 1.0f), glm::vec3(0.3f, 0.3f, 1.0f), glm::vec3(0.1f, 0.1f, 0.5f)};
+  return colors[rand() % colors.size()];
+}
+
+glm::vec3 WorldType::startTreeColor() {
+  std::vector<glm::vec3> colors = {glm::vec3(0.3f, 1.0f, 0.3f), glm::vec3(0.1f, 0.5f, 0.1f), glm::vec3(0.8f, 1.0f, 0.1f)};
+  return colors[rand() % colors.size()];
+}
+
+glm::vec3 WorldType::startLandColor() {
+  std::vector<glm::vec3> colors = {glm::vec3(0.4f, 0.4f, 0.4f), glm::vec3(0.2f, 0.2f, 0.2f), glm::vec3(0.5f, 0.3f, 0.3f)};
+  return colors[rand() % colors.size()];
 }
 
 #endif
