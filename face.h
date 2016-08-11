@@ -96,15 +96,15 @@ std::vector<std::vector<Voxel> > Face::perlinFieldY(float x, float y, float z, i
       float height = 1 + stb_perlin_noise3((float)(worldType.xOffset+x+r)/this->width * this->variability, (worldType.yOffset+y)/this->width * this->variability, (float)(worldType.zOffset+z+c)/this->width * this->variability) * this->heightMultiplier * (this->width/2 - abs(this->width/2 - c)) / (this->width/2) * (this->width/2 - abs(this->width/2 - r)) / (this->width/2);
       glm::vec3 color(1.0f, 0.3f, 0.3f);
       if (height < worldType.waterHeight) {
-        color = worldType.waterColor;
+        color = worldType.waterColorR();
         if (worldType.waterHeight > 0)
           height = 0;
         else
           height = worldType.waterHeight * (this->width/2 - abs(this->width/2 - c)) / (this->width/2) * (this->width/2 - abs(this->width/2 - r)) / (this->width/2);
       } else if (height < worldType.treeLine) {
-        color = worldType.treeColor;
+        color = worldType.treeColorR();
       } else if (height < worldType.snowLine) {
-        color = worldType.landColor;
+        color = worldType.landColorR();
       } else {
         color = worldType.snowColor;
       }
@@ -133,15 +133,15 @@ std::vector<std::vector<Voxel> > Face::perlinFieldX(float x, float y, float z, i
       float height = stb_perlin_noise3((worldType.xOffset+x)/this->width * this->variability, (float)(worldType.yOffset+y+r)/this->width * this->variability, (float)(worldType.zOffset+z+c)/this->width * this->variability) * this->heightMultiplier * (this->width/2 - abs(this->width/2 - c)) / (this->width/2) * (this->width/2 - abs(this->width/2 - r)) / (this->width/2);
       glm::vec3 color(1.0f, 0.3f, 0.3f);
       if (height < worldType.waterHeight) {
-        color = worldType.waterColor;
+        color = worldType.waterColorR();
         if (worldType.waterHeight > 0)
           height = 0;
         else
           height = worldType.waterHeight * (this->width/2 - abs(this->width/2 - c)) / (this->width/2) * (this->width/2 - abs(this->width/2 - r)) / (this->width/2);
       } else if (height < worldType.treeLine) {
-        color = worldType.treeColor;
+        color = worldType.treeColorR();
       } else if (height < worldType.snowLine) {
-        color = worldType.landColor;
+        color = worldType.landColorR();
       } else {
         color = worldType.snowColor;
       }
@@ -170,15 +170,15 @@ std::vector<std::vector<Voxel> > Face::perlinFieldZ(float x, float y, float z, i
       float height = stb_perlin_noise3((float)(worldType.xOffset+x+r)/this->width * this->variability, (float)(worldType.yOffset+y+c)/this->width * this->variability, (worldType.zOffset+z)/this->width * this->variability) * this->heightMultiplier * (this->width/2 - abs(this->width/2 - c)) / (this->width/2) * (this->width/2 - abs(this->width/2 - r)) / (this->width/2);
       glm::vec3 color(1.0f, 0.3f, 0.3f);
       if (height < worldType.waterHeight) {
-        color = worldType.waterColor;
+        color = worldType.waterColorR();
         if (worldType.waterHeight > 0)
           height = 0;
         else
           height = worldType.waterHeight * (this->width/2 - abs(this->width/2 - c)) / (this->width/2) * (this->width/2 - abs(this->width/2 - r)) / (this->width/2);
       } else if (height < worldType.treeLine) {
-        color = worldType.treeColor;
+        color = worldType.treeColorR();
       } else if (height < worldType.snowLine) {
-        color = worldType.landColor;
+        color = worldType.landColorR();
       } else {
         color = worldType.snowColor;
       }

@@ -39,10 +39,9 @@ class WorldType {
     glm::vec3 landColor;
     glm::vec3 snowColor;
 
-    glm::vec3 waterColor();
-    glm::vec3 treeColor();
-    glm::vec3 landColor();
-    glm::vec3 snowColor();
+    glm::vec3 waterColorR();
+    glm::vec3 treeColorR();
+    glm::vec3 landColorR();
 
     float random();
 };
@@ -75,6 +74,18 @@ WorldType::WorldType(float maxHeight) {
 
 float WorldType::random() {
   return (float)rand()/RAND_MAX;
+}
+
+glm::vec3 WorldType::waterColorR() {
+  return glm::vec3(waterColor.r + random() * 0.1f - 0.05f, waterColor.g + random() * 0.1f - 0.05f, waterColor.b + random() * 0.1f - 0.05f);
+}
+
+glm::vec3 WorldType::landColorR() {
+  return glm::vec3(landColor.r + random() * 0.1f - 0.05f, landColor.g + random() * 0.1f - 0.05f, landColor.b + random() * 0.1f - 0.05f);
+}
+
+glm::vec3 WorldType::treeColorR() {
+  return glm::vec3(treeColor.r + random() * 0.1f - 0.05f,  treeColor.g + random() * 0.1f - 0.05f, treeColor.b + random() * 0.1f - 0.05f);
 }
 
 #endif
