@@ -65,6 +65,7 @@ WorldType::WorldType(float maxHeight) {
   xOffset = random() * 100;
   yOffset = random() * 100;
   zOffset = random() * 100;
+  std::cout << xOffset << ", " << yOffset << ", " << zOffset << std::endl;
 }
 
 float WorldType::random() {
