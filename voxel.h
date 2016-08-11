@@ -33,6 +33,7 @@ class Voxel {
 
     void translate(float x, float y, float z);
     void rotate(glm::vec3 axis, float theta);
+    void scale(float x, float y, float z);
 
     glm::vec3 color;
 
@@ -174,6 +175,10 @@ void Voxel::translate(float x, float y, float z) {
 
 void Voxel::rotate(glm::vec3 axis, float theta) {
   this->rotation = glm::rotate(this->rotation, theta, axis);
+}
+
+void Voxel::scale(float x, float y, float z) {
+  this->model = glm::scale(this->model, glm::vec3(x, y, z));
 }
 
 #endif

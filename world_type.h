@@ -39,6 +39,11 @@ class WorldType {
     glm::vec3 landColor;
     glm::vec3 snowColor;
 
+    glm::vec3 waterColor();
+    glm::vec3 treeColor();
+    glm::vec3 landColor();
+    glm::vec3 snowColor();
+
     float random();
 };
 
@@ -47,7 +52,7 @@ WorldType::WorldType() {
 }
 
 WorldType::WorldType(float maxHeight) {
-  waterHeight = random() * maxHeight - maxHeight/2;
+  waterHeight = random() * maxHeight/2 - maxHeight/4;
   std::cout << "Water Height: " << waterHeight << std::endl;
   waterColor = glm::vec3(0.3f, 0.3f, 1.0f);
 

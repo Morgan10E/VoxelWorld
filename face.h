@@ -93,7 +93,7 @@ std::vector<std::vector<Voxel> > Face::perlinFieldY(float x, float y, float z, i
     std::vector<Voxel> row;
     grid.push_back(row);
     for (int c = 0; c < this->width; c++) {
-      float height = stb_perlin_noise3((float)(worldType.xOffset+x+r)/this->width * this->variability, (worldType.yOffset+y)/this->width * this->variability, (float)(worldType.zOffset+z+c)/this->width * this->variability) * this->heightMultiplier * (this->width/2 - abs(this->width/2 - c)) / (this->width/2) * (this->width/2 - abs(this->width/2 - r)) / (this->width/2);
+      float height = 1 + stb_perlin_noise3((float)(worldType.xOffset+x+r)/this->width * this->variability, (worldType.yOffset+y)/this->width * this->variability, (float)(worldType.zOffset+z+c)/this->width * this->variability) * this->heightMultiplier * (this->width/2 - abs(this->width/2 - c)) / (this->width/2) * (this->width/2 - abs(this->width/2 - r)) / (this->width/2);
       glm::vec3 color(1.0f, 0.3f, 0.3f);
       if (height < worldType.waterHeight) {
         color = worldType.waterColor;
@@ -109,7 +109,13 @@ std::vector<std::vector<Voxel> > Face::perlinFieldY(float x, float y, float z, i
         color = worldType.snowColor;
       }
       Voxel newVoxel(shader, shadowShader, depthMap, depthMapFBO, lightSpaceMatrix, color);
-      newVoxel.translate(x+r, floorf(y+direction*height), z+c);
+
+      if (floorf(height) > 0) {
+        newVoxel.translate(x+r, floorf(y+direction*height/2), z+c);
+        newVoxel.scale(1, floorf(height), 1);
+      } else {
+        newVoxel.translate(x+r, floorf(y+direction*height), z+c);
+      }
       // std::cout << x+r << ", " << floorf(y+height) << ", " << z+c << std::endl;
       grid[r].push_back(newVoxel);
     }
@@ -140,7 +146,13 @@ std::vector<std::vector<Voxel> > Face::perlinFieldX(float x, float y, float z, i
         color = worldType.snowColor;
       }
       Voxel newVoxel(shader, shadowShader, depthMap, depthMapFBO, lightSpaceMatrix, color);
-      newVoxel.translate(floorf(x+direction*height), y+r, z+c);
+
+      if (floorf(height) > 0) {
+        newVoxel.translate(floorf(x+direction*height/2), y+r, z+c);
+        newVoxel.scale(floorf(height), 1, 1);
+      } else {
+        newVoxel.translate(floorf(x+direction*height), y+r, z+c);
+      }
       // std::cout << x+r << ", " << floorf(y+height) << ", " << z+c << std::endl;
       grid[r].push_back(newVoxel);
     }
@@ -171,7 +183,13 @@ std::vector<std::vector<Voxel> > Face::perlinFieldZ(float x, float y, float z, i
         color = worldType.snowColor;
       }
       Voxel newVoxel(shader, shadowShader, depthMap, depthMapFBO, lightSpaceMatrix, color);
-      newVoxel.translate(x+r, y+c, floorf(z+direction*height));
+
+      if (floorf(height) > 0) {
+        newVoxel.translate(x+r, y+c, floorf(z+direction*height/2));
+        newVoxel.scale(1, 1, floorf(height));
+      } else {
+        newVoxel.translate(x+r, y+c, floorf(z+direction*height));
+      }
       // std::cout << x+r << ", " << floorf(y+height) << ", " << z+c << std::endl;
       grid[r].push_back(newVoxel);
       // if ((c == 0 || c == this->width - 1) && floorf(height) > 1) {
