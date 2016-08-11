@@ -22,19 +22,24 @@
 
 class Face {
   public:
-    Face(Shader* shader, float x, float y, float z, int width, std::string direction, float heightMultiplier, float variability);
-    void init(Shader* shader, glm::vec3 color);
+    Face(Shader* shader, Shader* shadowShader, GLuint depthMap, GLuint depthMapFBO, glm::mat4 lightSpaceMatrix, float x, float y, float z, int width, std::string direction, float heightMultiplier, float variability);
+    void init(Shader* shader, Shader* shadowShader, GLuint depthMap, GLuint depthMapFBO, glm::vec3 color);
     std::vector<std::vector<Voxel> > perlinFieldX(float x, float y, float z, int direction);
     std::vector<std::vector<Voxel> > perlinFieldY(float x, float y, float z, int direction);
     std::vector<std::vector<Voxel> > perlinFieldZ(float x, float y, float z, int direction);
     // ~Face();
 
     void render();
+    void renderReal(int w, int h);
+    void renderShadow();
 
     void translate(float x, float y, float z);
     void rotate(glm::vec3 axis, float theta);
 
     Shader* shader;
+    Shader* shadowShader;
+
+    GLuint depthMap, depthMapFBO;
 
   private:
     std::vector<std::vector<Voxel> > voxels;
@@ -43,10 +48,16 @@ class Face {
     std::string direction;
     float heightMultiplier, variability;
     float startX, startY, startZ;
+
+    glm::mat4 lightSpaceMatrix;
 };
 
-Face::Face(Shader* shader, float x, float y, float z, int width, std::string direction, float heightMultiplier, float variability) {
+Face::Face(Shader* shader, Shader* shadowShader, GLuint depthMap, GLuint depthMapFBO, glm::mat4 lightSpaceMatrix, float x, float y, float z, int width, std::string direction, float heightMultiplier, float variability) {
   this->shader = shader;
+  this->shadowShader = shadowShader;
+  this->depthMap = depthMap;
+  this->depthMapFBO = depthMapFBO;
+  this->lightSpaceMatrix = lightSpaceMatrix;
   this->startX = x;
   this->startY = y;
   this->startZ = z;
@@ -80,7 +91,7 @@ std::vector<std::vector<Voxel> > Face::perlinFieldY(float x, float y, float z, i
       if (floorf(height) < -1) {
         color = glm::vec3(0.3f, 0.3f, 1.0f);
       }
-      Voxel newVoxel(shader, color);
+      Voxel newVoxel(shader, shadowShader, depthMap, depthMapFBO, lightSpaceMatrix, color);
       newVoxel.translate(x+r, floorf(y+direction*height), z+c);
       // std::cout << x+r << ", " << floorf(y+height) << ", " << z+c << std::endl;
       grid[r].push_back(newVoxel);
@@ -101,7 +112,7 @@ std::vector<std::vector<Voxel> > Face::perlinFieldX(float x, float y, float z, i
       if (floorf(height) < -1) {
         color = glm::vec3(0.3f, 0.3f, 1.0f);
       }
-      Voxel newVoxel(shader, color);
+      Voxel newVoxel(shader, shadowShader, depthMap, depthMapFBO, lightSpaceMatrix, color);
       newVoxel.translate(floorf(x+direction*height), y+r, z+c);
       // std::cout << x+r << ", " << floorf(y+height) << ", " << z+c << std::endl;
       grid[r].push_back(newVoxel);
@@ -122,7 +133,7 @@ std::vector<std::vector<Voxel> > Face::perlinFieldZ(float x, float y, float z, i
       if (floorf(height) < -1) {
         color = glm::vec3(0.3f, 0.3f, 1.0f);
       }
-      Voxel newVoxel(shader, color);
+      Voxel newVoxel(shader, shadowShader, depthMap, depthMapFBO, lightSpaceMatrix, color);
       newVoxel.translate(x+r, y+c, floorf(z+direction*height));
       // std::cout << x+r << ", " << floorf(y+height) << ", " << z+c << std::endl;
       grid[r].push_back(newVoxel);
@@ -160,10 +171,26 @@ void Face::rotate(glm::vec3 axis, float theta) {
   }
 }
 
+void Face::renderReal(int w, int h) {
+  for (std::vector<std::vector<Voxel> >::iterator rit = voxels.begin(); rit != voxels.end(); ++rit) {
+    for (std::vector<Voxel>::iterator cit = (*rit).begin(); cit != (*rit).end(); ++cit) {
+      cit->renderReal(w,h);
+    }
+  }
+}
+
+void Face::renderShadow() {
+  for (std::vector<std::vector<Voxel> >::iterator rit = voxels.begin(); rit != voxels.end(); ++rit) {
+    for (std::vector<Voxel>::iterator cit = (*rit).begin(); cit != (*rit).end(); ++cit) {
+      cit->renderShadow();
+    }
+  }
+}
+
 void Face::render() {
   for (std::vector<std::vector<Voxel> >::iterator rit = voxels.begin(); rit != voxels.end(); ++rit) {
     for (std::vector<Voxel>::iterator cit = (*rit).begin(); cit != (*rit).end(); ++cit) {
-      cit->render();
+      cit->render(shader);
     }
   }
 }

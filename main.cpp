@@ -44,13 +44,13 @@ void printGrid(std::vector<std::vector<float> >& grid);
 const GLuint WIDTH = 800, HEIGHT = 600;
 
 // Camera
-Camera  camera(glm::vec3(10.0f, 10.0f, 50.0f));
+Camera  camera(glm::vec3(0.0f, 0.0f, 50.0f));
 GLfloat lastX  =  WIDTH  / 2.0;
 GLfloat lastY  =  HEIGHT / 2.0;
 bool    keys[1024];
 
 // Light attributes
-glm::vec3 lightPos(1.2f, 1.0f, 2.0f);
+glm::vec3 lightPos(-30.0f, 0.0f, 10.0f);
 
 // Deltatime
 GLfloat deltaTime = 0.0f;	// Time between current frame and last frame
@@ -59,9 +59,9 @@ GLfloat lastFrame = 0.0f;  	// Time of last frame
 // The MAIN function, from here we start the application and run the game loop
 int main()
 {
-    int width = 40;
+    int width = 30;
     float heightMultiplier = 15.0;
-    float variability = 4.0f;
+    float variability = 5.0f;
     float floorFactor = 1.0f;
     // std::vector<std::vector<float> > grid = perlinField(width, length, heightMultiplier, variability);
     // printGrid(grid);
@@ -102,6 +102,33 @@ int main()
 
     // Build and compile our shader program
     Shader lightingShader("phong.vs", "phong.frag");
+    lightingShader.Use();
+    glUniform1i(glGetUniformLocation(lightingShader.Program, "shadowMap"), 0);
+
+    Shader shadowShader("shadow.vs", "shadow.frag");
+
+    GLuint depthMapFBO;
+    glGenFramebuffers(1, &depthMapFBO);
+    // - Create depth texture
+    GLuint depthMap;
+    glGenTextures(1, &depthMap);
+    glBindTexture(GL_TEXTURE_2D, depthMap);
+
+    glTexImage2D(GL_TEXTURE_2D, 0, GL_DEPTH_COMPONENT, 1024, 1024, 0, GL_DEPTH_COMPONENT, GL_FLOAT, NULL);
+    glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_NEAREST);
+    glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_NEAREST);
+    glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, GL_CLAMP_TO_BORDER);
+    glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, GL_CLAMP_TO_BORDER);
+    GLfloat borderColor[] = { 1.0, 1.0, 1.0, 1.0 };
+    glTexParameterfv(GL_TEXTURE_2D, GL_TEXTURE_BORDER_COLOR, borderColor);
+
+    glBindFramebuffer(GL_FRAMEBUFFER, depthMapFBO);
+    glFramebufferTexture2D(GL_FRAMEBUFFER, GL_DEPTH_ATTACHMENT, GL_TEXTURE_2D, depthMap, 0);
+    glDrawBuffer(GL_NONE);
+    glReadBuffer(GL_NONE);
+    glBindFramebuffer(GL_FRAMEBUFFER, 0);
+
+    glClearColor(0.1f, 0.1f, 0.1f, 1.0f);
 
     // Set up vertex data (and buffer(s)) and attribute pointers
     // First, set the container's VAO (and VBO)
@@ -188,7 +215,15 @@ int main()
     // Face face5(&lightingShader, 0,0,0, width, "NX", heightMultiplier, variability);
     // Face face6(&lightingShader, width,0,0, width, "PX", heightMultiplier, variability);
 
-    World world(&lightingShader, 0,0,0, width, heightMultiplier, variability);
+    glm::mat4 lightProjection, lightView;
+    glm::mat4 lightSpaceMatrix;
+    GLfloat near_plane = -10.0f, far_plane = 20.0f;
+    lightProjection = glm::ortho(-10.0f, 10.0f, -10.0f, 10.0f, near_plane, far_plane);
+    //lightProjection = glm::perspective(45.0f, (GLfloat)SHADOW_WIDTH / (GLfloat)SHADOW_HEIGHT, near_plane, far_plane); // Note that if you use a perspective projection matrix you'll have to change the light position as the current light position isn't enough to reflect the whole scene.
+    lightView = glm::lookAt(lightPos, glm::vec3(0.0f, 0.0f, 0.0f), glm::vec3(0.0, 1.0, 0.0));
+    lightSpaceMatrix = lightProjection * lightView;
+
+    World world(&lightingShader, &shadowShader, depthMap, depthMapFBO, lightSpaceMatrix, 0,0,0, width, heightMultiplier, variability);
     // world.rotate(glm::vec3(0,1,0), 180);
 
     // Game loop
@@ -198,6 +233,7 @@ int main()
         GLfloat currentFrame = glfwGetTime();
         deltaTime = currentFrame - lastFrame;
         lastFrame = currentFrame;
+        // std::cout << currentFrame << std::endl;
 
         // Check if any events have been activiated (key pressed, mouse moved etc.) and call corresponding response functions
         glfwPollEvents();
@@ -206,6 +242,10 @@ int main()
         // Clear the colorbuffer
         glClearColor(0.1f, 0.1f, 0.1f, 1.0f);
         glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
+
+        world.rotate(glm::vec3(0,1,0), currentFrame/10000);
+        // world.render();
+        world.renderShadow();
 
         // Use cooresponding shader when setting uniforms/drawing objects
         lightingShader.Use();
@@ -217,8 +257,6 @@ int main()
         glUniform3f(lightColorLoc,  1.0f, 1.0f, 1.0f);
         glUniform3f(lightPosLoc,    lightPos.x, lightPos.y, lightPos.z);
         glUniform3f(viewPosLoc,     camera.Position.x, camera.Position.y, camera.Position.z);
-
-
 
         // Create camera transformations
         glm::mat4 view;
@@ -232,24 +270,7 @@ int main()
         glUniformMatrix4fv(viewLoc, 1, GL_FALSE, glm::value_ptr(view));
         glUniformMatrix4fv(projLoc, 1, GL_FALSE, glm::value_ptr(projection));
 
-        // Draw the container (using container's vertex attributes)
-        // glBindVertexArray(containerVAO);
-        // glm::mat4 model;
-        // glUniformMatrix4fv(modelLoc, 1, GL_FALSE, glm::value_ptr(model));
-        // glDrawArrays(GL_TRIANGLES, 0, 36);
-        // glBindVertexArray(0);
-
-        // for (std::vector<Voxel>::iterator voxel = voxels.begin(); voxel != voxels.end(); ++voxel) {
-        //   (*voxel).render();
-        // }
-        // face1.render();
-        // face2.render();
-        // face3.render();
-        // face4.render();
-        // face5.render();
-        // face6.render();
-        world.rotate(glm::vec3(0,1,0), currentFrame/10000);
-        world.render();
+        world.renderReal(w,h);
 
         // Swap the screen buffers
         glfwSwapBuffers(window);
@@ -286,6 +307,10 @@ void do_movement()
         camera.ProcessKeyboard(LEFT, deltaTime);
     if (keys[GLFW_KEY_D])
         camera.ProcessKeyboard(RIGHT, deltaTime);
+    if (keys[GLFW_KEY_Q])
+        camera.ProcessKeyboard(DOWN, deltaTime);
+    if (keys[GLFW_KEY_E])
+        camera.ProcessKeyboard(UP, deltaTime);
 }
 
 bool firstMouse = true;

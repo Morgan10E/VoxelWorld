@@ -19,12 +19,14 @@
 
 class Voxel {
   public:
-    Voxel(Shader* shader);
-    Voxel(Shader* shader, glm::vec3 color);
-    void init(Shader* shader, glm::vec3 color);
+    Voxel(Shader* shader, Shader* shadowShader, GLuint depthMap, GLuint depthMapFBO, glm::mat4 lightSpaceMatrix);
+    Voxel(Shader* shader, Shader* shadowShader, GLuint depthMap, GLuint depthMapFBO, glm::mat4 lightSpaceMatrix, glm::vec3 color);
+    void init(Shader* shader, Shader* shadowShader, GLuint depthMap, GLuint depthMapFBO, glm::mat4 lightSpaceMatrix, glm::vec3 color);
     // ~Voxel();
 
-    void render();
+    void renderShadow();
+    void renderReal(int w, int h);
+    void render(Shader* shad);
 
     void translate(float x, float y, float z);
     void rotate(glm::vec3 axis, float theta);
@@ -32,26 +34,28 @@ class Voxel {
     glm::vec3 color;
 
     Shader* shader;
+    Shader* shadowShader;
 
-    glm::mat4 model, rotation, translation;
+    glm::mat4 model, rotation, translation, lightSpaceMatrix;
 
+    GLuint depthMap, depthMapFBO;
     // strint type
 
   private:
     GLuint voxelCornersAO;
 
-    GLint modelLoc, transLoc, rotLoc, viewLoc, projectionLoc, voxelColorLoc;
+    GLint modelLoc, transLoc, rotLoc, viewLoc, projectionLoc, voxelColorLoc, lightSpaceMatrixLoc, lightSpaceMatrixShadowLoc;
 };
 
-Voxel::Voxel(Shader* shader, glm::vec3 color) {
-  this->init(shader, color);
+Voxel::Voxel(Shader* shader, Shader* shadowShader, GLuint depthMap, GLuint depthMapFBO, glm::mat4 lightSpaceMatrix, glm::vec3 color) {
+  this->init(shader, shadowShader, depthMap, depthMapFBO, lightSpaceMatrix, color);
 }
 
-Voxel::Voxel(Shader* shader) {
-  this->init(shader, glm::vec3(1.0f, 0.2f, 0.2f));
+Voxel::Voxel(Shader* shader, Shader* shadowShader, GLuint depthMap, GLuint depthMapFBO, glm::mat4 lightSpaceMatrix) {
+  this->init(shader, shadowShader, depthMap, depthMapFBO, lightSpaceMatrix, glm::vec3(1.0f, 0.2f, 0.2f));
 }
 
-void Voxel::init(Shader* shader, glm::vec3 color) {
+void Voxel::init(Shader* shader, Shader* shadowShader, GLuint depthMap, GLuint depthMapFBO, glm::mat4 lightSpaceMatrix, glm::vec3 color) {
   float vertices[] = {
       -0.5f, -0.5f, -0.5f,  0.0f,  0.0f, -1.0f,
        0.5f, -0.5f, -0.5f,  0.0f,  0.0f, -1.0f,
@@ -101,6 +105,10 @@ void Voxel::init(Shader* shader, glm::vec3 color) {
   this->translation = glm::mat4(1.0f);
   this->color = color;
   this->shader = shader;
+  this->shadowShader = shadowShader;
+  this->depthMap = depthMap;
+  this->depthMapFBO = depthMapFBO;
+  this->lightSpaceMatrix = lightSpaceMatrix;
   // this->type = "NONE";
 
   modelLoc = glGetUniformLocation(shader->Program, "model");
@@ -108,6 +116,8 @@ void Voxel::init(Shader* shader, glm::vec3 color) {
   transLoc = glGetUniformLocation(shader->Program, "translation");
 	projectionLoc = glGetUniformLocation(shader->Program, "projection");
   voxelColorLoc = glGetUniformLocation(shader->Program, "voxelColor");
+  lightSpaceMatrixLoc = glGetUniformLocation(shader->Program, "lightSpaceMatrix");
+  lightSpaceMatrixShadowLoc = glGetUniformLocation(shadowShader->Program, "lightSpaceMatrix");
 
   glGenVertexArrays(1, &voxelCornersAO);
   glBindVertexArray(voxelCornersAO);
@@ -127,15 +137,29 @@ void Voxel::init(Shader* shader, glm::vec3 color) {
   glBindVertexArray(0);
 }
 
-void Voxel::render() {
+void Voxel::renderShadow() {
+  shadowShader->Use();
+
+  glUniformMatrix4fv(lightSpaceMatrixShadowLoc, 1, GL_FALSE, glm::value_ptr(lightSpaceMatrix));
+
+  render(shadowShader);
+}
+
+void Voxel::renderReal(int w, int h) {
   shader->Use();
 
+  glUniformMatrix4fv(lightSpaceMatrixLoc, 1, GL_FALSE, glm::value_ptr(lightSpaceMatrix));
+
+  render(shader);
+}
+
+void Voxel::render(Shader* shad) {
   glBindVertexArray(voxelCornersAO);
 
   glUniform3f(voxelColorLoc, this->color[0], this->color[1], this->color[2]);
-  glUniformMatrix4fv(modelLoc, 1, GL_FALSE, glm::value_ptr(model));
-  glUniformMatrix4fv(rotLoc, 1, GL_FALSE, glm::value_ptr(rotation));
-  glUniformMatrix4fv(transLoc, 1, GL_FALSE, glm::value_ptr(translation));
+  glUniformMatrix4fv(glGetUniformLocation(shad->Program, "model"), 1, GL_FALSE, glm::value_ptr(model));
+  glUniformMatrix4fv(glGetUniformLocation(shad->Program, "rotation"), 1, GL_FALSE, glm::value_ptr(rotation));
+  glUniformMatrix4fv(glGetUniformLocation(shad->Program, "translation"), 1, GL_FALSE, glm::value_ptr(translation));
   glDrawArrays(GL_TRIANGLES, 0, 36);
   glBindVertexArray(0);
 }

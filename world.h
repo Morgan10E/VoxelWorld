@@ -22,11 +22,13 @@
 
 class World {
   public:
-    World(Shader* shader, float x, float y, float z, int width, float heightMultiplier, float variability);
-    void init(Shader* shader, glm::vec3 color);
+    World(Shader* shader, Shader* shadowShader, GLuint depthMap, GLuint depthMapFBO, glm::mat4 lightSpaceMatrix, float x, float y, float z, int width, float heightMultiplier, float variability);
+    void init(Shader* shader, Shader* shadowShader, GLuint depthMap, GLuint depthMapFBO, glm::mat4 lightSpaceMatrix, glm::vec3 color);
     // ~Face();
 
     void render();
+    void renderReal(int w, int h);
+    void renderShadow();
 
     void translate(float x, float y, float z);
     void rotate(glm::vec3 axis, float theta);
@@ -41,10 +43,13 @@ class World {
     float startX, startY, startZ;
 
     glm::mat4 location, rotation;
-    GLint worldLoc, worldRot;
+    GLint worldLoc, worldRot, worldShadLoc, worldShadRot;
+    GLuint depthMapFBO, depthMap;
+
+    glm::mat4 lightSpaceMatrix;
 };
 
-World::World(Shader* shader, float x, float y, float z, int width, float heightMultiplier, float variability) {
+World::World(Shader* shader, Shader* shadowShader, GLuint depthMap, GLuint depthMapFBO, glm::mat4 lightSpaceMatrix, float x, float y, float z, int width, float heightMultiplier, float variability) {
   this->shader = shader;
   this->startX = x - width/2;
   this->startY = y - width/2;
@@ -52,6 +57,9 @@ World::World(Shader* shader, float x, float y, float z, int width, float heightM
   this->width = width;
   this->heightMultiplier = heightMultiplier;
   this->variability = variability;
+  this->lightSpaceMatrix = lightSpaceMatrix;
+  this->depthMap = depthMap;
+  this->depthMapFBO = depthMapFBO;
 
   location = glm::mat4(1.0f);
   location = glm::translate(location, glm::vec3(startX, startY, startZ));
@@ -60,18 +68,20 @@ World::World(Shader* shader, float x, float y, float z, int width, float heightM
 
   worldLoc = glGetUniformLocation(shader->Program, "worldLocation");
   worldRot = glGetUniformLocation(shader->Program, "worldRotation");
+  worldShadLoc = glGetUniformLocation(shadowShader->Program, "worldLocation");
+  worldShadRot = glGetUniformLocation(shadowShader->Program, "worldRotation");
 
-  Face face1(shader, startX,startY,startZ, width, "NZ", heightMultiplier, variability);
+  Face face1(shader, shadowShader, depthMap, depthMapFBO, lightSpaceMatrix, startX,startY,startZ, width, "NZ", heightMultiplier, variability);
   this->faces.push_back(face1);
-  Face face2(shader, startX,startY,startZ, width, "NY", heightMultiplier, variability);
+  Face face2(shader, shadowShader, depthMap, depthMapFBO, lightSpaceMatrix, startX,startY,startZ, width, "NY", heightMultiplier, variability);
   this->faces.push_back(face2);
-  Face face3(shader, startX,startY,startZ+width, width, "PZ", heightMultiplier, variability);
+  Face face3(shader, shadowShader, depthMap, depthMapFBO, lightSpaceMatrix, startX,startY,startZ+width, width, "PZ", heightMultiplier, variability);
   this->faces.push_back(face3);
-  Face face4(shader, startX,startY+width,startZ, width, "PY", heightMultiplier, variability);
+  Face face4(shader, shadowShader, depthMap, depthMapFBO, lightSpaceMatrix, startX,startY+width,startZ, width, "PY", heightMultiplier, variability);
   this->faces.push_back(face4);
-  Face face5(shader, startX,startY,startZ, width, "NX", heightMultiplier, variability);
+  Face face5(shader, shadowShader, depthMap, depthMapFBO, lightSpaceMatrix, startX,startY,startZ, width, "NX", heightMultiplier, variability);
   this->faces.push_back(face5);
-  Face face6(shader, startX+width,startY,startZ, width, "PX", heightMultiplier, variability);
+  Face face6(shader, shadowShader, depthMap, depthMapFBO, lightSpaceMatrix, startX+width,startY,startZ, width, "PX", heightMultiplier, variability);
   this->faces.push_back(face6);
 }
 
@@ -95,4 +105,35 @@ void World::render() {
   for (std::vector<Face>::iterator fit = faces.begin(); fit != faces.end(); ++fit) {
       fit->render();
   }
+}
+
+void World::renderReal(int w, int h) {
+  glViewport(0, 0, w, h);
+  glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
+
+  glUniformMatrix4fv(worldLoc, 1, GL_FALSE, glm::value_ptr(location));
+  glUniformMatrix4fv(worldRot, 1, GL_FALSE, glm::value_ptr(rotation));
+
+  glActiveTexture(GL_TEXTURE0);
+  glBindTexture(GL_TEXTURE_2D, depthMap);
+
+  for (std::vector<Face>::iterator fit = faces.begin(); fit != faces.end(); ++fit) {
+      fit->renderReal(w,h);
+  }
+}
+
+void World::renderShadow() {
+  // glCullFace(GL_FRONT);
+  glViewport(0, 0, 1024, 1024);
+  glBindFramebuffer(GL_FRAMEBUFFER, depthMapFBO);
+    glClear(GL_DEPTH_BUFFER_BIT);
+
+    glUniformMatrix4fv(worldShadLoc, 1, GL_FALSE, glm::value_ptr(location));
+    glUniformMatrix4fv(worldShadRot, 1, GL_FALSE, glm::value_ptr(rotation));
+    for (std::vector<Face>::iterator fit = faces.begin(); fit != faces.end(); ++fit) {
+        fit->renderShadow();
+    }
+
+  glBindFramebuffer(GL_FRAMEBUFFER, 0);
+  // glCullFace(GL_BACK);
 }
