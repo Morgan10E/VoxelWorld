@@ -1,3 +1,6 @@
+#ifndef VOXEL_H
+#define VOXEL_H
+
 #define GLEW_STATIC
 
 #include "Shader.h"
@@ -172,3 +175,5 @@ void Voxel::translate(float x, float y, float z) {
 void Voxel::rotate(glm::vec3 axis, float theta) {
   this->rotation = glm::rotate(this->rotation, theta, axis);
 }
+
+#endif

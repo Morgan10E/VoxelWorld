@@ -1,8 +1,12 @@
+#ifndef WORLD_H
+#define WORLD_H
+
 #define GLEW_STATIC
 #define STB_PERLIN_IMPLEMENTATION
 
 #include "Shader.h"
 #include "face.h"
+#include "world_type.h"
 // #include "stb_perlin.h"
 
 #include <GL/glew.h>
@@ -37,6 +41,7 @@ class World {
 
   private:
     std::vector<Face> faces;
+    WorldType worldType;
 
     int width;
     float heightMultiplier, variability;
@@ -60,6 +65,8 @@ World::World(Shader* shader, Shader* shadowShader, GLuint depthMap, GLuint depth
   this->lightSpaceMatrix = lightSpaceMatrix;
   this->depthMap = depthMap;
   this->depthMapFBO = depthMapFBO;
+  WorldType type(heightMultiplier);
+  this->worldType = type;
 
   location = glm::mat4(1.0f);
   location = glm::translate(location, glm::vec3(startX, startY, startZ));
@@ -71,17 +78,17 @@ World::World(Shader* shader, Shader* shadowShader, GLuint depthMap, GLuint depth
   worldShadLoc = glGetUniformLocation(shadowShader->Program, "worldLocation");
   worldShadRot = glGetUniformLocation(shadowShader->Program, "worldRotation");
 
-  Face face1(shader, shadowShader, depthMap, depthMapFBO, lightSpaceMatrix, startX,startY,startZ, width, "NZ", heightMultiplier, variability);
+  Face face1(shader, shadowShader, depthMap, depthMapFBO, lightSpaceMatrix, startX,startY,startZ, width, "NZ", heightMultiplier, variability, worldType);
   this->faces.push_back(face1);
-  Face face2(shader, shadowShader, depthMap, depthMapFBO, lightSpaceMatrix, startX,startY,startZ, width, "NY", heightMultiplier, variability);
+  Face face2(shader, shadowShader, depthMap, depthMapFBO, lightSpaceMatrix, startX,startY,startZ, width, "NY", heightMultiplier, variability, worldType);
   this->faces.push_back(face2);
-  Face face3(shader, shadowShader, depthMap, depthMapFBO, lightSpaceMatrix, startX,startY,startZ+width, width, "PZ", heightMultiplier, variability);
+  Face face3(shader, shadowShader, depthMap, depthMapFBO, lightSpaceMatrix, startX,startY,startZ+width, width, "PZ", heightMultiplier, variability, worldType);
   this->faces.push_back(face3);
-  Face face4(shader, shadowShader, depthMap, depthMapFBO, lightSpaceMatrix, startX,startY+width,startZ, width, "PY", heightMultiplier, variability);
+  Face face4(shader, shadowShader, depthMap, depthMapFBO, lightSpaceMatrix, startX,startY+width,startZ, width, "PY", heightMultiplier, variability, worldType);
   this->faces.push_back(face4);
-  Face face5(shader, shadowShader, depthMap, depthMapFBO, lightSpaceMatrix, startX,startY,startZ, width, "NX", heightMultiplier, variability);
+  Face face5(shader, shadowShader, depthMap, depthMapFBO, lightSpaceMatrix, startX,startY,startZ, width, "NX", heightMultiplier, variability, worldType);
   this->faces.push_back(face5);
-  Face face6(shader, shadowShader, depthMap, depthMapFBO, lightSpaceMatrix, startX+width,startY,startZ, width, "PX", heightMultiplier, variability);
+  Face face6(shader, shadowShader, depthMap, depthMapFBO, lightSpaceMatrix, startX+width,startY,startZ, width, "PX", heightMultiplier, variability, worldType);
   this->faces.push_back(face6);
 }
 
@@ -137,3 +144,5 @@ void World::renderShadow() {
   glBindFramebuffer(GL_FRAMEBUFFER, 0);
   // glCullFace(GL_BACK);
 }
+
+#endif

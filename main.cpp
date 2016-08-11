@@ -4,6 +4,7 @@
 
 #include <iostream>
 #include <cmath>
+#include <stdlib.h>
 
 // GLEW
 #define GLEW_STATIC
@@ -59,6 +60,8 @@ GLfloat lastFrame = 0.0f;  	// Time of last frame
 // The MAIN function, from here we start the application and run the game loop
 int main()
 {
+    srand(time(NULL));
+
     int width = 30;
     float heightMultiplier = 15.0;
     float variability = 5.0f;
